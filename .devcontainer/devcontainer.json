@@ -1,0 +1,38 @@
+{
+    "name": "Dolibarr Dev Environment",
+    "image": "php:8.1-fpm-bullseye",
+    "features": {
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+      "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "felixfbecker.php-debug",
+          "bmewburn.vscode-intelephense-client",
+          "GitHub.vscode-pull-request-github"
+        ]
+      }
+    },
+    "postCreateCommand": "export MYSQL_ROOT_PASSWORD=$(openssl rand -base64 12); \
+                         docker run -d --name mysql-dolibarr \
+                            -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+                            -e MYSQL_USER=dolibarr \
+                            -e MYSQL_PASSWORD=dolibarr_password \
+                            -e MYSQL_DATABASE=dolibarr \
+                            -p 3306:3306 \
+                            -v mysql-data:/var/lib/mysql mysql:latest; \
+                            \
+                        cd /workspaces/maerp/htdocs && php -S 0.0.0.0:8080 -t .",
+    "forwardPorts": [8080, 3306],
+    "containerUser": "www-data",
+    "containerEnv": {
+      "MYSQL_ROOT_PASSWORD": "${localEnv:MYSQL_ROOT_PASSWORD}",
+      "MYSQL_USER": "dolibarr",
+      "MYSQL_PASSWORD": "dolibarr_password",
+      "MYSQL_DATABASE": "dolibarr"
+    },
+    "mounts": [
+      "source=${localWorkspaceFolder},target=/workspaces/maerp,type=bind"
+    ]
+  }
